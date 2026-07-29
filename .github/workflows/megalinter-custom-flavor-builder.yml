@@ -1,0 +1,72 @@
+---
+# =============================================================
+# Build MegaLinter Custom Flavor Workflow
+#
+# This workflow builds and publishes a custom MegaLinter Docker image
+# to GitHub Container Registry (ghcr.io).
+#
+# Flow (no Personal Access Token required):
+#   1. Renovate bumps MEGALINTER_VERSION below (commit type "feat") when a new
+#      MegaLinter release is published, and merges it to main.
+#   2. release-please opens/updates a release PR for that change.
+#   3. Merging the release PR publishes a GitHub Release, which triggers this
+#      workflow.
+#   4. The image is built from the pinned MegaLinter version and pushed to
+#      ghcr.io as :<megalinter-version> (no :latest tag is published).
+#
+# The MegaLinter custom flavor image will be available at:
+#   - ghcr.io/<owner>/<repo>/megalinter-custom-flavor:<tag>
+# =============================================================
+name: Build & Push MegaLinter Custom Flavor
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+env:
+  # MegaLinter version the custom flavor is built from.
+  # Renovate keeps this in sync with new MegaLinter releases.
+  # renovate: datasource=github-releases depName=oxsecurity/megalinter
+  MEGALINTER_VERSION: "v9.6.0"
+
+jobs:
+  build-custom-flavor:
+    name: Build Custom MegaLinter Flavor
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build MegaLinter Custom Flavor
+        uses: oxsecurity/megalinter/flavors/custom-builder@ef3e84b8b836d76db562d0f3ed7da61e8fd538bc # v9.6.0
+        with:
+          megalinter-custom-flavor-builder-tag: ${{ env.MEGALINTER_VERSION }}
+          platform: "linux/amd64"
+          is-latest: "false"
+          upload-to-ghcr: "true"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CUSTOM_FLAVOR_BUILD_REPO: ${{ github.repository }}
+          CUSTOM_FLAVOR_BUILD_REPO_URL: ${{ github.repositoryUrl }}
+          CUSTOM_FLAVOR_BUILD_USER: ${{ github.actor }}

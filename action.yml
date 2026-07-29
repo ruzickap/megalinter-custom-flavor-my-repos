@@ -1,0 +1,16 @@
+---
+name: "MegaLinter Custom Flavor: MyRepos"
+author: "Petr Ruzicka"
+description: "MegaLinter Custom Flavor MyRepos"
+outputs:
+  has_updated_sources:
+    description: "0 if no source file has been updated, 1 if source files have been updated"
+runs:
+  using: "docker"
+  # Pinned to a specific image version (no :latest tag is published).
+  # Renovate keeps this in sync with newly built custom flavor images.
+  # renovate: datasource=docker depName=ghcr.io/ruzickap/megalinter-custom-flavor-my-repos/megalinter-custom-flavor
+  image: "docker://ghcr.io/ruzickap/megalinter-custom-flavor-my-repos/megalinter-custom-flavor:v9.6.0"
+branding:
+  icon: "check"
+  color: "green"

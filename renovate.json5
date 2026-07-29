@@ -1,0 +1,24 @@
+{
+  /**
+   * Repository-level Renovate configuration.
+   *
+   * The self-hosted global Renovate (ruzickap/my-git-projects ->
+   * .github/renovate-global.json5) autodiscovers this repository and provides
+   * the base config plus the custom "# renovate:" regex manager that detects
+   * the MEGALINTER_VERSION pin in .github/workflows/megalinter-custom-flavor-builder.yml.
+   *
+   * This file only adds what is specific to this repo: the MegaLinter bump must
+   * be a "feat" commit so that release-please opens a release PR for it. Merging
+   * that release PR publishes a GitHub Release, which triggers the custom flavor
+   * image build.
+   */
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  packageRules: [
+    {
+      matchDepNames: ["oxsecurity/megalinter"],
+      commitMessageTopic: "MegaLinter",
+      // Releasable type so release-please picks it up (minor bump).
+      semanticCommitType: "feat",
+    },
+  ],
+}
