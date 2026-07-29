@@ -20,8 +20,21 @@ jobs:
       contents: write
       issues: write
       pull-requests: write
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
     steps:
       - name: Create release with Release Please
+        id: release
         uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         with:
           release-type: simple
+
+  # A release published by GITHUB_TOKEN cannot trigger other workflows, so
+  # call the builder directly as a reusable workflow. No PAT needed.
+  build-custom-flavor:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created }}
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/megalinter-custom-flavor-builder.yml

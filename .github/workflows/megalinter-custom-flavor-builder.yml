@@ -9,8 +9,9 @@
 #   1. Renovate bumps MEGALINTER_VERSION below (commit type "feat") when a new
 #      MegaLinter release is published, and merges it to main.
 #   2. release-please opens/updates a release PR for that change.
-#   3. Merging the release PR publishes a GitHub Release, which triggers this
-#      workflow.
+#   3. Merging the release PR publishes a GitHub Release; release-please.yml
+#      then calls this reusable workflow (a release created by GITHUB_TOKEN
+#      cannot trigger workflows on its own).
 #   4. The image is built from the pinned MegaLinter version and pushed to
 #      ghcr.io as :<megalinter-version> (no :latest tag is published).
 #
@@ -20,8 +21,9 @@
 name: Build & Push MegaLinter Custom Flavor
 
 on:
-  release:
-    types: [published]
+  # Called by release-please.yml after a release (GITHUB_TOKEN releases cannot
+  # trigger workflows), plus manual runs.
+  workflow_call:
   workflow_dispatch:
 
 concurrency:
