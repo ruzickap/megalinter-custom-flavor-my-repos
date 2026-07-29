@@ -20,7 +20,7 @@ on:
         type: boolean
         description: Dry-Run
   schedule:
-    - cron: 30 1 * * 1
+    - cron: 30 1 * 1 *
 
 permissions: read-all
 
