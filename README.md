@@ -1,5 +1,7 @@
 # MegaLinter Custom Flavor: MyRepos
 
+[![Build & Push MegaLinter Custom Flavor](https://github.com/ruzickap/megalinter-custom-flavor-my-repos/actions/workflows/megalinter-custom-flavor-builder.yml/badge.svg)](https://github.com/ruzickap/megalinter-custom-flavor-my-repos/actions/workflows/megalinter-custom-flavor-builder.yml)
+
 This custom MegaLinter flavor aims to have an optimized Docker image size by
 bundling only the linters used across
 [my repositories](https://github.com/ruzickap).
@@ -108,5 +110,3 @@ To change the embedded linters, edit `megalinter-custom-flavor.yml`, run
 other files, then commit and create a release to rebuild. You can also run the
 `Build & Push MegaLinter Custom Flavor` workflow manually to rebuild the
 currently pinned MegaLinter version.
-
-[![MegaLinter is graciously provided by OX Security](https://raw.githubusercontent.com/oxsecurity/megalinter/main/docs/assets/images/ox-banner.png)](https://www.ox.security/?ref=megalinter)

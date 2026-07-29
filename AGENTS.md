@@ -6,31 +6,71 @@ already loaded. This file only records what is specific to THIS repo.
 
 ## What this repo is
 
-- Purpose: define a **custom MegaLinter Docker flavor** bundling the linters
-  used across the maintainer's repositories.
-- Current state: this is a **config- and CI-only scaffold**. There is no
-  application source, no build, no test suite, and (as of now) **no Dockerfile
-  / flavor definition or `flavors/*` manifest yet**. Do not invent build/test
-  commands - there are none to run locally.
-- The single source of truth for linter selection and tuning is
-  `.mega-linter.yml`; sibling tool configs are `.rumdl.toml`, `lychee.toml`,
-  `.checkov.yml`. Edit those, don't restate their contents elsewhere.
+- Purpose: define and publish a **custom MegaLinter Docker flavor** bundling
+  only the linters used across the maintainer's repositories, to keep the image
+  small.
+- There is **no application source, build, or test suite** to run locally. The
+  repo is config + CI + a consumable GitHub Action (`action.yml`). Do not invent
+  build/test commands.
+- The published artifacts are a Docker image on ghcr.io and this repo used
+  directly as a GitHub Action (`ruzickap/megalinter-custom-flavor-my-repos@main`).
 
-## CI quirks (verified in `.github/workflows/`)
+## Two different MegaLinter configs - do not confuse them
 
-- `mega-linter.yml` runs MegaLinter using the **upstream `documentation`
-  flavor** (`oxsecurity/megalinter/flavors/documentation`), NOT the custom
-  flavor this repo intends to produce. Keep this in mind - the flavor being
-  built and the flavor running CI are currently different things.
-- The mega-linter job only runs on **branches other than `main`**, is skipped
-  for `chore/renovate/*` and `release-please--*` branches, and only lints
-  changed `**/*.md` files (plus extracts bash from markdown code blocks for
+- `megalinter-custom-flavor.yml` = the **flavor definition**: the list of
+  linters baked into the built Docker image.
+- `.mega-linter.yml` = config for **linting this repo's own files** in CI
+  (arguments, disabled linters, filters). Sibling tool configs: `.rumdl.toml`,
+  `lychee.toml`, `.checkov.yml`. Edit those, don't restate their contents.
+
+## Changing the embedded linter set (important workflow)
+
+The linter list is **duplicated** across `megalinter-custom-flavor.yml`,
+`action.yml`, and the "Embedded linters" list in `README.md`. Do not hand-edit
+them individually. Instead:
+
+1. Edit the `linters:` list in `megalinter-custom-flavor.yml`.
+2. Run `npx mega-linter-runner --custom-flavor-setup` to propagate the change to
+   the other files.
+3. Commit, then release to rebuild the image (see release flow below).
+
+`.mega-linter.yml` sets `FAIL_IF_MISSING_LINTER_IN_FLAVOR: true`, so a linter
+enabled for CI but absent from the running flavor fails the build.
+
+`.mega-linter.yml` uses `# keep-sorted start` / `# keep-sorted end` markers -
+keep entries within those blocks alphabetically sorted.
+
+## Version pinning
+
+- `MEGALINTER_VERSION` in `.github/workflows/megalinter-custom-flavor-builder.yml`
+  is the source of truth for which MegaLinter version the image is built from.
+  **Renovate** bumps it (as a `feat` commit). Corresponding pinned tags also
+  appear in `action.yml` (`...megalinter-custom-flavor:v9.6.0`) and in workflow
+  action SHAs - Renovate keeps these in sync; don't hand-bump.
+- No `:latest` tag is published; consumers always reference an immutable version.
+
+## Release / build flow (no PAT required)
+
+1. Renovate bumps `MEGALINTER_VERSION` (`feat`) and merges to `main`.
+2. `release-please.yml` (`release-type: simple`) opens/updates a release PR.
+3. Merging the release PR publishes a GitHub Release.
+4. The release triggers `megalinter-custom-flavor-builder.yml`, which builds the
+   image and pushes it to ghcr.io. Can also be run via `workflow_dispatch`.
+5. `ghcr-cleanup.yml` (monthly) keeps the 2 newest version tags and deletes
+   untagged manifests.
+
+Do not hand-edit versions or `CHANGELOG.md` (generated; excluded from all
+linters/link checks).
+
+## CI quirks (`.github/workflows/mega-linter.yml`)
+
+- CI lints this repo using the **upstream `documentation` flavor**
+  (`oxsecurity/megalinter/flavors/documentation`), NOT the custom flavor this
+  repo produces. The flavor built and the flavor running CI are different things.
+- Runs only on **branches other than `main`**, skipped for `chore/renovate/*`
+  and `release-please--*` branches (unless `workflow_dispatch`), and only lints
+  **changed `**/*.md`** files (plus extracts bash from markdown code blocks for
   validation). Pushing markdown to a feature branch is what triggers linting.
-- `FAIL_IF_MISSING_LINTER_IN_FLAVOR: true` - a linter enabled in
-  `.mega-linter.yml` but absent from the running flavor fails the build.
-- Releases: `release-please.yml` runs on `main` with `release-type: simple`
-  and bumps the version from conventional commits. Do not hand-edit versions or
-  `CHANGELOG.md` (it is generated and excluded from all linters/link checks).
 
 ## Notes
 
