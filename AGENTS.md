@@ -66,9 +66,9 @@ linters/link checks).
 
 ## CI quirks (`.github/workflows/mega-linter.yml`)
 
-- CI lints this repo using its **own custom flavor image** by referencing the
-  ghcr.io image directly (`uses: docker://ghcr.io/...megalinter-custom-flavor`),
-  so the flavor produced and the flavor running CI are the same.
+- CI lints this repo using its **own custom flavor image** via the local
+  action (`uses: ./` -> `action.yml` -> the ghcr.io image this repo builds), so
+  the flavor produced and the flavor running CI are the same.
 - Runs only on **branches other than `main`**, skipped for `chore/renovate/*`
   and `release-please--*` branches (unless `workflow_dispatch`), and only lints
   **changed `**/*.md`** files (plus extracts bash from markdown code blocks for

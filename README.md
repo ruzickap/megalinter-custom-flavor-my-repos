@@ -72,26 +72,8 @@ It is built from official MegaLinter images, but is maintained on
 
 Follow the
 [MegaLinter installation guide](https://megalinter.io/latest/install-assisted/)
-to create `.github/workflows/mega-linter.yml`, then point the MegaLinter step at
-this custom flavor. There are two equivalent ways to do it.
-
-### Option A - reference the Docker image directly (recommended)
-
-Replace the official MegaLinter action with this repo's pinned image via
-`uses: docker://...`:
-
-```yaml
-      # renovate: datasource=docker depName=ghcr.io/ruzickap/megalinter-custom-flavor-my-repos/megalinter-custom-flavor
-      - name: 💡 MegaLinter
-        uses: docker://ghcr.io/ruzickap/megalinter-custom-flavor-my-repos/megalinter-custom-flavor:v9.6.0
-        env:
-          GITHUB_COMMENT_REPORTER: false
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-```
-
-### Option B - use it as a GitHub Action
-
-The repo also ships an `action.yml` that runs the same pinned image:
+to create `.github/workflows/mega-linter.yml`, then replace the official
+MegaLinter action with this custom flavor's GitHub Action:
 
 ```yaml
       - name: 💡 MegaLinter
@@ -101,8 +83,9 @@ The repo also ships an `action.yml` that runs the same pinned image:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-No `:latest` tag is published, so consumers always reference an immutable,
-pinned version (kept in sync by Renovate).
+The action pulls a specific, pinned image version (kept in sync by Renovate) -
+no `:latest` tag is published, so consumers always reference an immutable,
+reproducible version.
 
 ## How the flavor is generated and updated
 
