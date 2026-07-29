@@ -12,7 +12,7 @@
 #   3. Merging the release PR publishes a GitHub Release, which triggers this
 #      workflow.
 #   4. The image is built from the pinned MegaLinter version and pushed to
-#      ghcr.io as :<megalinter-version> and :latest.
+#      ghcr.io as :<megalinter-version> (no :latest tag is published).
 #
 # The MegaLinter custom flavor image will be available at:
 #   - ghcr.io/<owner>/<repo>/megalinter-custom-flavor:<tag>
@@ -63,7 +63,7 @@ jobs:
         with:
           megalinter-custom-flavor-builder-tag: ${{ env.MEGALINTER_VERSION }}
           platform: "linux/amd64"
-          is-latest: "true"
+          is-latest: "false"
           upload-to-ghcr: "true"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

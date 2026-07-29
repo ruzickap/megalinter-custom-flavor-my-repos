@@ -75,8 +75,11 @@ and replace related elements in the workflow.
 - **GitHub Action**: on the MegaLinter step in `.github/workflows/mega-linter.yml`,
   define
   `uses: ruzickap/megalinter-custom-flavor-my-repos@main`
-- **Docker image**: replace the official MegaLinter image with
-  `ghcr.io/ruzickap/megalinter-custom-flavor-my-repos/megalinter-custom-flavor:latest`
+  (the action pulls a specific, pinned image version - no `:latest` tag is
+  published)
+- **Docker image**: replace the official MegaLinter image with a versioned tag,
+  e.g.
+  `ghcr.io/ruzickap/megalinter-custom-flavor-my-repos/megalinter-custom-flavor:v9.6.0`
 
 ## How the flavor is generated and updated
 
@@ -94,11 +97,11 @@ Personal Access Token:
    - builds a Docker image with only the selected linters,
    - publishes it to GitHub Container Registry (ghcr.io).
 
-Available image tags:
+Image tags:
 
 - `v<megalinter-version>` (e.g. `v9.6.0`): the MegaLinter version the image was
-  built from,
-- `latest`: points to the most recently built image.
+  built from. No `:latest` tag is published, so consumers always reference an
+  immutable, reproducible version (kept in sync by Renovate).
 
 To change the embedded linters, edit `megalinter-custom-flavor.yml`, run
 `npx mega-linter-runner --custom-flavor-setup` to propagate the change to the
