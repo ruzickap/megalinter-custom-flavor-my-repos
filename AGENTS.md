@@ -54,8 +54,10 @@ keep entries within those blocks alphabetically sorted.
 1. Renovate bumps `MEGALINTER_VERSION` (`feat`) and merges to `main`.
 2. `release-please.yml` (`release-type: simple`) opens/updates a release PR.
 3. Merging the release PR publishes a GitHub Release.
-4. The release triggers `megalinter-custom-flavor-builder.yml`, which builds the
-   image and pushes it to ghcr.io. Can also be run via `workflow_dispatch`.
+4. `release-please.yml` then calls `megalinter-custom-flavor-builder.yml` (a
+   reusable workflow) to build the image and push it to ghcr.io, because a
+   release created by `GITHUB_TOKEN` cannot trigger workflows on its own. Can
+   also be run via `workflow_dispatch`.
 5. `ghcr-cleanup.yml` (monthly) keeps the 2 newest version tags and deletes
    untagged manifests.
 
@@ -64,9 +66,9 @@ linters/link checks).
 
 ## CI quirks (`.github/workflows/mega-linter.yml`)
 
-- CI lints this repo using the **upstream `documentation` flavor**
-  (`oxsecurity/megalinter/flavors/documentation`), NOT the custom flavor this
-  repo produces. The flavor built and the flavor running CI are different things.
+- CI lints this repo using its **own custom flavor image** via the local
+  action (`uses: ./` -> `action.yml` -> the ghcr.io image this repo builds), so
+  the flavor produced and the flavor running CI are the same.
 - Runs only on **branches other than `main`**, skipped for `chore/renovate/*`
   and `release-please--*` branches (unless `workflow_dispatch`), and only lints
   **changed `**/*.md`** files (plus extracts bash from markdown code blocks for

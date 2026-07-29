@@ -71,17 +71,21 @@ It is built from official MegaLinter images, but is maintained on
 ## How to use the custom flavor
 
 Follow the
-[MegaLinter installation guide](https://megalinter.io/latest/install-assisted/),
-and replace related elements in the workflow.
+[MegaLinter installation guide](https://megalinter.io/latest/install-assisted/)
+to create `.github/workflows/mega-linter.yml`, then replace the official
+MegaLinter action with this custom flavor's GitHub Action:
 
-- **GitHub Action**: on the MegaLinter step in `.github/workflows/mega-linter.yml`,
-  define
-  `uses: ruzickap/megalinter-custom-flavor-my-repos@main`
-  (the action pulls a specific, pinned image version - no `:latest` tag is
-  published)
-- **Docker image**: replace the official MegaLinter image with a versioned tag,
-  e.g.
-  `ghcr.io/ruzickap/megalinter-custom-flavor-my-repos/megalinter-custom-flavor:v9.6.0`
+```yaml
+      - name: 💡 MegaLinter
+        uses: ruzickap/megalinter-custom-flavor-my-repos@main
+        env:
+          GITHUB_COMMENT_REPORTER: false
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+The action pulls a specific, pinned image version (kept in sync by Renovate) -
+no `:latest` tag is published, so consumers always reference an immutable,
+reproducible version.
 
 ## How the flavor is generated and updated
 
@@ -94,8 +98,9 @@ Personal Access Token:
 2. **release-please** sees the `feat` commit and opens (or updates) a release
    pull request.
 3. **You merge the release PR when ready**, which publishes a GitHub Release.
-4. The published release triggers the `megalinter-custom-flavor-builder`
-   workflow, which:
+4. `release-please` then calls the `megalinter-custom-flavor-builder` reusable
+   workflow (a release created by `GITHUB_TOKEN` cannot trigger workflows on its
+   own), which:
    - builds a Docker image with only the selected linters,
    - publishes it to GitHub Container Registry (ghcr.io).
 
