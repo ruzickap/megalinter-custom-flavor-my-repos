@@ -1,0 +1,43 @@
+---
+# =============================================================
+# ghcr.io image cleanup
+#
+# Removes stale custom flavor images from the GitHub Container Registry.
+# The image is rebuilt for every MegaLinter version, so old version tags and
+# any untagged (dangling) manifests accumulate over time.
+#
+# Retention:
+#   - always keep the "latest" tag,
+#   - keep the 2 most recent version tags (e.g. v9.6.0 and v9.5.0),
+#   - delete untagged manifests.
+# =============================================================
+name: ghcr-cleanup
+
+on:
+  workflow_dispatch:
+    inputs:
+      dryRun:
+        type: boolean
+        description: Dry-Run
+  schedule:
+    - cron: 30 1 * * 1
+
+permissions: read-all
+
+jobs:
+  ghcr-cleanup:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
+    permissions:
+      packages: write
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+    steps:
+      - name: Delete old ghcr.io images
+        uses: dataaxiom/ghcr-cleanup-action@v1
+        with:
+          package: megalinter-custom-flavor-my-repos/megalinter-custom-flavor
+          exclude-tags: latest
+          keep-n-tagged: 2
+          delete-untagged: true
+          dry-run: ${{ inputs.dryRun || false }}
