@@ -45,7 +45,7 @@ keep entries within those blocks alphabetically sorted.
 - `MEGALINTER_VERSION` in `.github/workflows/megalinter-custom-flavor-builder.yml`
   is the source of truth for which MegaLinter version the image is built from.
   **Renovate** bumps it (as a `feat` commit). Corresponding pinned tags also
-  appear in `action.yml` (`...megalinter-custom-flavor:v9.6.0`) and in workflow
+  appear in `action.yml` (`...megalinter-custom-flavor:v10.0.0`) and in workflow
   action SHAs - Renovate keeps these in sync; don't hand-bump.
 - No `:latest` tag is published; consumers always reference an immutable version.
 
