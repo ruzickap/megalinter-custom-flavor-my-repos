@@ -104,7 +104,7 @@ Personal Access Token:
 
 Image tags:
 
-- `v<megalinter-version>` (e.g. `v9.6.0`): the MegaLinter version the image was
+- `v<megalinter-version>` (e.g. `v10.0.0`): the MegaLinter version the image was
   built from. No `:latest` tag is published, so consumers always reference an
   immutable, reproducible version (kept in sync by Renovate).
 

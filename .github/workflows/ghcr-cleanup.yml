@@ -7,7 +7,7 @@
 # any untagged (dangling) manifests accumulate over time.
 #
 # Retention:
-#   - keep the 2 most recent version tags (e.g. v9.6.0 and v9.5.0),
+#   - keep the 2 most recent version tags (e.g. v10.0.0 and v9.6.0),
 #   - delete untagged manifests.
 # =============================================================
 name: ghcr-cleanup
