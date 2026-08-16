@@ -61,7 +61,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build MegaLinter Custom Flavor
-        uses: oxsecurity/megalinter/flavors/custom-builder@ef3e84b8b836d76db562d0f3ed7da61e8fd538bc # v9.6.0
+        uses: oxsecurity/megalinter/flavors/custom-builder@15e5b45552097e318c93de385779ce3b1084052c # v10.0.0
         with:
           megalinter-custom-flavor-builder-tag: ${{ env.MEGALINTER_VERSION }}
           platform: "linux/amd64"
