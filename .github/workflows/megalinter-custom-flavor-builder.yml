@@ -63,7 +63,8 @@ jobs:
       - name: Build MegaLinter Custom Flavor
         uses: oxsecurity/megalinter/flavors/custom-builder@9949bad031045f366be2467e00e8371a7328a2e2 # v10.1.0
         with:
-          megalinter-custom-flavor-builder-tag: ${{ env.MEGALINTER_VERSION }}
+          # Renovate strips the "v" from MEGALINTER_VERSION, but builder tags keep it
+          megalinter-custom-flavor-builder-tag: v${{ env.MEGALINTER_VERSION }}
           platform: "linux/amd64"
           is-latest: "false"
           upload-to-ghcr: "true"
