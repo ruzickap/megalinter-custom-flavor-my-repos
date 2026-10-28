@@ -44,9 +44,11 @@ keep entries within those blocks alphabetically sorted.
 
 - `MEGALINTER_VERSION` in `.github/workflows/megalinter-custom-flavor-builder.yml`
   is the source of truth for which MegaLinter version the image is built from.
-  **Renovate** bumps it (as a `feat` commit). Corresponding pinned tags also
-  appear in `action.yml` (`...megalinter-custom-flavor:v10.0.0`) and in workflow
-  action SHAs - Renovate keeps these in sync; don't hand-bump.
+  **Renovate** bumps it (as a `fix`/`feat`/`feat!` commit) without the `v`
+  prefix; the builder adds `v` back because upstream builder image tags use it.
+  The built image tag (`v<version>`) and digest are pinned in `action.yml` and
+  bumped by Renovate's `github-actions` manager (no `# renovate:` comment there,
+  or the regex manager would strip the `v`); don't hand-bump.
 - No `:latest` tag is published; consumers always reference an immutable version.
 
 ## Release / build flow (no PAT required)
