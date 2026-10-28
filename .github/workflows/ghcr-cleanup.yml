@@ -38,7 +38,5 @@ jobs:
         with:
           package: megalinter-custom-flavor-my-repos/megalinter-custom-flavor
           keep-n-tagged: 2
-          # Per-arch staging tags of the builder, overwritten by every build
-          exclude-tags: build-*
           delete-untagged: true
           dry-run: ${{ inputs.dryRun || false }}

@@ -13,10 +13,8 @@
 #      then calls this reusable workflow (a release created by GITHUB_TOKEN
 #      cannot trigger workflows on its own).
 #   4. The image is built from the pinned MegaLinter version for linux/amd64
-#      and linux/arm64 and pushed to ghcr.io as a multi-arch
-#      :<megalinter-version> (no :latest tag is published).
-#      Note: jscpd (COPYPASTE_JSCPD) and chktex (LATEX_CHKTEX) are amd64-only
-#      upstream and may fail at runtime on arm64.
+#      and linux/arm64 and pushed to ghcr.io as :<megalinter-version>
+#      (no :latest tag is published).
 #
 # The MegaLinter custom flavor image will be available at:
 #   - ghcr.io/<owner>/<repo>/megalinter-custom-flavor:<tag>
@@ -42,23 +40,12 @@ env:
   MEGALINTER_VERSION: "10.1.0"
 
 jobs:
-  # Each platform is built natively, pushed to a "build-<arch>" staging tag,
-  # and merged into one multi-arch "v<version>" tag by the next job.
   build-custom-flavor:
-    name: Build Custom MegaLinter Flavor (${{ matrix.arch }})
-    strategy:
-      matrix:
-        include:
-          - arch: amd64
-            runner: ubuntu-latest
-          - arch: arm64
-            runner: ubuntu-24.04-arm
-    runs-on: ${{ matrix.runner }}
+    name: Build Custom MegaLinter Flavor
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-    outputs:
-      image_version: ${{ steps.push.outputs.image_version }}
 
     steps:
       - name: Checkout Code
@@ -74,61 +61,32 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Same as oxsecurity/megalinter/flavors/custom-builder, minus its push
-      # step (single-arch only) and artifact upload (name clashes in a matrix)
+      # Emulate arm64 for the multi-platform build
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+
+      # The builder uses the system daemon (/var/run/docker.sock), whose default
+      # image store can't hold multi-platform images
+      - name: Enable containerd image store
+        run: |
+          { sudo cat /etc/docker/daemon.json 2> /dev/null || echo '{}'; } |
+            jq '.features."containerd-snapshotter" = true' |
+            sudo tee /etc/docker/daemon.json.new > /dev/null
+          sudo mv /etc/docker/daemon.json.new /etc/docker/daemon.json
+          sudo systemctl restart docker
+          docker info -f '{{ .DriverStatus }}'
+
       - name: Build MegaLinter Custom Flavor
+        uses: oxsecurity/megalinter/flavors/custom-builder@9949bad031045f366be2467e00e8371a7328a2e2 # v10.1.0
+        with:
+          # Renovate strips the "v" from MEGALINTER_VERSION, but builder tags keep it
+          megalinter-custom-flavor-builder-tag: v${{ env.MEGALINTER_VERSION }}
+          # jscpd and chktex are amd64-only upstream and may fail on arm64
+          platform: "linux/amd64,linux/arm64"
+          is-latest: "false"
+          upload-to-ghcr: "true"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CUSTOM_FLAVOR_PLATFORM: linux/${{ matrix.arch }}
           CUSTOM_FLAVOR_BUILD_REPO: ${{ github.repository }}
           CUSTOM_FLAVOR_BUILD_REPO_URL: ${{ github.repositoryUrl }}
           CUSTOM_FLAVOR_BUILD_USER: ${{ github.actor }}
-        run: |
-          # Renovate strips the "v" from MEGALINTER_VERSION, but builder tags keep it
-          docker run --rm \
-            -v /var/run/docker.sock:/var/run/docker.sock:rw \
-            -v "${GITHUB_WORKSPACE}:/github/workspace" \
-            -e GITHUB_TOKEN \
-            -e CUSTOM_FLAVOR_PLATFORM \
-            -e CUSTOM_FLAVOR_BUILD_REPO \
-            -e CUSTOM_FLAVOR_BUILD_REPO_URL \
-            -e CUSTOM_FLAVOR_BUILD_USER \
-            "ghcr.io/oxsecurity/megalinter-custom-flavor-builder:v${MEGALINTER_VERSION}"
-
-      - name: Push platform image
-        id: push
-        env:
-          ARCH: ${{ matrix.arch }}
-        run: |
-          REPO_LOWER=$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')
-          LOCAL_IMAGE=$(echo "${REPO_LOWER}" | tr '/' '_')
-          IMAGE="ghcr.io/${REPO_LOWER}/megalinter-custom-flavor"
-          IMAGE_VERSION=$(docker inspect --format='{{index .Config.Labels "org.opencontainers.image.version"}}' "${LOCAL_IMAGE}")
-          docker tag "${LOCAL_IMAGE}" "${IMAGE}:build-${ARCH}"
-          docker push "${IMAGE}:build-${ARCH}"
-          echo "image_version=${IMAGE_VERSION}" >> "${GITHUB_OUTPUT}"
-
-  merge-platforms:
-    name: Publish multi-arch image
-    needs: build-custom-flavor
-    runs-on: ubuntu-24.04-arm
-    timeout-minutes: 10
-    permissions:
-      packages: write
-
-    steps:
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create multi-arch manifest
-        env:
-          IMAGE_VERSION: ${{ needs.build-custom-flavor.outputs.image_version }}
-        run: |
-          IMAGE="ghcr.io/$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')/megalinter-custom-flavor"
-          docker buildx imagetools create -t "${IMAGE}:${IMAGE_VERSION}" \
-            "${IMAGE}:build-amd64" "${IMAGE}:build-arm64"
-          docker buildx imagetools inspect "${IMAGE}:${IMAGE_VERSION}"
