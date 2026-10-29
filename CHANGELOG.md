@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/ruzickap/megalinter-custom-flavor-my-repos/compare/v1.1.0...v1.2.0) (2026-10-29)
+
+
+### Features
+
+* build multi-arch (amd64 + arm64) custom flavor image ([#15](https://github.com/ruzickap/megalinter-custom-flavor-my-repos/issues/15)) ([10cd8be](https://github.com/ruzickap/megalinter-custom-flavor-my-repos/commit/10cd8bec40c98075a159c94e30b200ee18e80f9c))
+
 ## [1.1.0](https://github.com/ruzickap/megalinter-custom-flavor-my-repos/compare/v1.0.0...v1.1.0) (2026-10-28)
 
 
