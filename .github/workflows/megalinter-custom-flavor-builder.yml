@@ -77,7 +77,7 @@ jobs:
           docker info -f '{{ .DriverStatus }}'
 
       - name: Build MegaLinter Custom Flavor
-        uses: oxsecurity/megalinter/flavors/custom-builder@9949bad031045f366be2467e00e8371a7328a2e2 # v10.1.0
+        uses: oxsecurity/megalinter/flavors/custom-builder@f2fe8c1cba37091848df3e524066c8c23ef353ed # v10.2.0
         with:
           # Renovate strips the "v" from MEGALINTER_VERSION, but builder tags keep it
           megalinter-custom-flavor-builder-tag: v${{ env.MEGALINTER_VERSION }}
