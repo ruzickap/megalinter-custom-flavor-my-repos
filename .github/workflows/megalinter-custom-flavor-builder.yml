@@ -37,7 +37,7 @@ env:
   # MegaLinter version the custom flavor is built from.
   # Renovate keeps this in sync with new MegaLinter releases.
   # renovate: datasource=github-releases depName=oxsecurity/megalinter
-  MEGALINTER_VERSION: "10.1.0"
+  MEGALINTER_VERSION: "10.2.0"
 
 jobs:
   build-custom-flavor:
