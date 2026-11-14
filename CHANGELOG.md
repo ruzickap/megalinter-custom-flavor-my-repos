@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.2.0](https://github.com/ruzickap/megalinter-custom-flavor-my-repos/compare/v1.1.0...v1.2.0) (2026-11-14)
+
+
+### Features
+
+* build multi-arch (amd64 + arm64) custom flavor image ([#15](https://github.com/ruzickap/megalinter-custom-flavor-my-repos/issues/15)) ([10cd8be](https://github.com/ruzickap/megalinter-custom-flavor-my-repos/commit/10cd8bec40c98075a159c94e30b200ee18e80f9c))
+* **deps:** update MegaLinter to v10.2.0 ([#18](https://github.com/ruzickap/megalinter-custom-flavor-my-repos/issues/18)) ([7b473a9](https://github.com/ruzickap/megalinter-custom-flavor-my-repos/commit/7b473a9e8bc9d60f8549d22e9f8f5965350a5159))
+* **deps:** update MegaLinter to v10.2.0 ([#19](https://github.com/ruzickap/megalinter-custom-flavor-my-repos/issues/19)) ([4f80272](https://github.com/ruzickap/megalinter-custom-flavor-my-repos/commit/4f80272fc8109c5481ac77a2443b80562ec9164e))
+
 ## [1.1.0](https://github.com/ruzickap/megalinter-custom-flavor-my-repos/compare/v1.0.0...v1.1.0) (2026-10-28)
 
 
