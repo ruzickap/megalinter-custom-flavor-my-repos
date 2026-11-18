@@ -1,6 +1,7 @@
 ---
 # MegaLinter Custom Flavor configuration
-# If you update it manually, run `npx mega-linter-runner --custom-flavor-setup` to propagate updates.
+# Merging a change to main rebuilds the image. Do not run
+# `npx mega-linter-runner --custom-flavor-setup`, it overwrites custom files.
 label: MyRepos
 linters:
   - ACTION_ACTIONLINT

@@ -11,60 +11,8 @@ It is built from official MegaLinter images, but is maintained on
 
 ## Embedded linters
 
-- [ACTION_ACTIONLINT](https://megalinter.io/latest/descriptors/action_actionlint/)
-- [ACTION_ZIZMOR](https://megalinter.io/latest/descriptors/action_zizmor/)
-- [ANSIBLE_ANSIBLE_LINT](https://megalinter.io/latest/descriptors/ansible_ansible_lint/)
-- [BASH_EXEC](https://megalinter.io/latest/descriptors/bash_bash_exec/)
-- [BASH_SHELLCHECK](https://megalinter.io/latest/descriptors/bash_shellcheck/)
-- [BASH_SHFMT](https://megalinter.io/latest/descriptors/bash_shfmt/)
-- [CLOUDFORMATION_CFN_LINT](https://megalinter.io/latest/descriptors/cloudformation_cfn_lint/)
-- [COPYPASTE_JSCPD](https://megalinter.io/latest/descriptors/copypaste_jscpd/)
-- [DOCKERFILE_HADOLINT](https://megalinter.io/latest/descriptors/dockerfile_hadolint/)
-- [GO_GOLANGCI_LINT](https://megalinter.io/latest/descriptors/go_golangci_lint/)
-- [GO_REVIVE](https://megalinter.io/latest/descriptors/go_revive/)
-- [HTML_DJLINT](https://megalinter.io/latest/descriptors/html_djlint/)
-- [HTML_HTMLHINT](https://megalinter.io/latest/descriptors/html_htmlhint/)
-- [JAVASCRIPT_ES](https://megalinter.io/latest/descriptors/javascript_eslint/)
-- [JSON_JSONLINT](https://megalinter.io/latest/descriptors/json_jsonlint/)
-- [JSON_NPM_PACKAGE_JSON_LINT](https://megalinter.io/latest/descriptors/json_npm_package_json_lint/)
-- [JSON_PRETTIER](https://megalinter.io/latest/descriptors/json_prettier/)
-- [JSON_V8R](https://megalinter.io/latest/descriptors/json_v8r/)
-- [LATEX_CHKTEX](https://megalinter.io/latest/descriptors/latex_chktex/)
-- [MARKDOWN_MARKDOWN_TABLE_FORMATTER](https://megalinter.io/latest/descriptors/markdown_markdown_table_formatter/)
-- [MARKDOWN_RUMDL](https://megalinter.io/latest/descriptors/markdown_rumdl/)
-- [PYTHON_BANDIT](https://megalinter.io/latest/descriptors/python_bandit/)
-- [PYTHON_FLAKE8](https://megalinter.io/latest/descriptors/python_flake8/)
-- [PYTHON_ISORT](https://megalinter.io/latest/descriptors/python_isort/)
-- [PYTHON_MYPY](https://megalinter.io/latest/descriptors/python_mypy/)
-- [PYTHON_NBQA_MYPY](https://megalinter.io/latest/descriptors/python_nbqa/)
-- [PYTHON_PYLINT](https://megalinter.io/latest/descriptors/python_pylint/)
-- [PYTHON_PYRIGHT](https://megalinter.io/latest/descriptors/python_pyright/)
-- [PYTHON_RUFF](https://megalinter.io/latest/descriptors/python_ruff/)
-- [PYTHON_RUFF_FORMAT](https://megalinter.io/latest/descriptors/python_ruff_format/)
-- [REPOSITORY_BETTERLEAKS](https://megalinter.io/latest/descriptors/repository_betterleaks/)
-- [REPOSITORY_CHECKOV](https://megalinter.io/latest/descriptors/repository_checkov/)
-- [REPOSITORY_DEVSKIM](https://megalinter.io/latest/descriptors/repository_devskim/)
-- [REPOSITORY_DUSTILOCK](https://megalinter.io/latest/descriptors/repository_dustilock/)
-- [REPOSITORY_GIT_DIFF](https://megalinter.io/latest/descriptors/repository_git_diff/)
-- [REPOSITORY_GRYPE](https://megalinter.io/latest/descriptors/repository_grype/)
-- [REPOSITORY_KINGFISHER](https://megalinter.io/latest/descriptors/repository_kingfisher/)
-- [REPOSITORY_OSV_SCANNER](https://megalinter.io/latest/descriptors/repository_osv_scanner/)
-- [REPOSITORY_SECRETLINT](https://megalinter.io/latest/descriptors/repository_secretlint/)
-- [REPOSITORY_SYFT](https://megalinter.io/latest/descriptors/repository_syft/)
-- [REPOSITORY_TRIVY](https://megalinter.io/latest/descriptors/repository_trivy/)
-- [REPOSITORY_TRIVY_SBOM](https://megalinter.io/latest/descriptors/repository_trivy_sbom/)
-- [REPOSITORY_TRUFFLEHOG](https://megalinter.io/latest/descriptors/repository_trufflehog/)
-- [RUBY_RUBOCOP](https://megalinter.io/latest/descriptors/ruby_rubocop/)
-- [SPELL_CODESPELL](https://megalinter.io/latest/descriptors/spell_codespell/)
-- [SPELL_LYCHEE](https://megalinter.io/latest/descriptors/spell_lychee/)
-- [TERRAFORM_TERRAFORM_FMT](https://megalinter.io/latest/descriptors/terraform_terraform_fmt/)
-- [TERRAFORM_TFLINT](https://megalinter.io/latest/descriptors/terraform_tflint/)
-- [TSX_ESLINT](https://megalinter.io/latest/descriptors/tsx_eslint/)
-- [TYPESCRIPT_ES](https://megalinter.io/latest/descriptors/typescript_eslint/)
-- [XML_XMLLINT](https://megalinter.io/latest/descriptors/xml_xmllint/)
-- [YAML_PRETTIER](https://megalinter.io/latest/descriptors/yaml_prettier/)
-- [YAML_V8R](https://megalinter.io/latest/descriptors/yaml_v8r/)
-- [YAML_YAMLLINT](https://megalinter.io/latest/descriptors/yaml_yamllint/)
+The linters baked into the image are listed in
+[`megalinter-custom-flavor.yml`](megalinter-custom-flavor.yml).
 
 ## How to use the custom flavor
 
@@ -81,35 +29,33 @@ MegaLinter action with this custom flavor's GitHub Action:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-The action pulls a specific, pinned image version (kept in sync by Renovate) -
-no `:latest` tag is published, so consumers always reference an immutable,
-reproducible version.
+The action pins its image by tag and digest, and Renovate keeps that pin
+current. No `:latest` tag is published. `@main` follows the pin, so pin a commit
+SHA instead if you need a fixed image.
 
-## How the flavor is generated and updated
+## How the flavor is built and updated
 
 This custom flavor is kept up to date with MegaLinter releases without any
 Personal Access Token:
 
 1. **Renovate** detects a new MegaLinter release and bumps `MEGALINTER_VERSION`
-   in `.github/workflows/megalinter-custom-flavor-builder.yml` as a `feat`
-   commit, merging it to `main`.
-2. **release-please** sees the `feat` commit and opens (or updates) a release
-   pull request.
-3. **You merge the release PR when ready**, which publishes a GitHub Release.
-4. `release-please` then calls the `megalinter-custom-flavor-builder` reusable
-   workflow (a release created by `GITHUB_TOKEN` cannot trigger workflows on its
-   own), which:
+   in `.github/workflows/megalinter-custom-flavor-builder.yml`, merging it to
+   `main`.
+2. That push runs the `Build & Push MegaLinter Custom Flavor` workflow, which:
    - builds a Docker image with only the selected linters,
-   - publishes it to GitHub Container Registry (ghcr.io).
+   - publishes it to GitHub Container Registry (ghcr.io) as
+     `v<megalinter-version>` (e.g. `v10.2.0`).
+3. **Renovate** then updates the image tag and digest pinned in `action.yml`.
 
-Image tags:
+release-please still maintains `CHANGELOG.md` and GitHub Releases, but a
+release does not build anything.
 
-- `v<megalinter-version>` (e.g. `v10.0.0`): the MegaLinter version the image was
-  built from. No `:latest` tag is published, so consumers always reference an
-  immutable, reproducible version (kept in sync by Renovate).
+To change the embedded linters, edit `megalinter-custom-flavor.yml` and merge
+the change to `main`, which rebuilds the image. Do not run
+`npx mega-linter-runner --custom-flavor-setup`: it overwrites `action.yml`,
+this README and the builder workflow with upstream templates.
 
-To change the embedded linters, edit `megalinter-custom-flavor.yml`, run
-`npx mega-linter-runner --custom-flavor-setup` to propagate the change to the
-other files, then commit and create a release to rebuild. You can also run the
-`Build & Push MegaLinter Custom Flavor` workflow manually to rebuild the
-currently pinned MegaLinter version.
+You can also run the `Build & Push MegaLinter Custom Flavor` workflow manually.
+It only works soon after a MegaLinter bump: the upstream builder installs exact
+Alpine package versions, which Alpine removes at its next update, so an older
+MegaLinter version can't be rebuilt later.
