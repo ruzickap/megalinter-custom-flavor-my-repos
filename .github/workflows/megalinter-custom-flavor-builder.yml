@@ -6,15 +6,16 @@
 # to GitHub Container Registry (ghcr.io).
 #
 # Flow (no Personal Access Token required):
-#   1. Renovate bumps MEGALINTER_VERSION below (commit type "feat") when a new
-#      MegaLinter release is published, and merges it to main.
-#   2. release-please opens/updates a release PR for that change.
-#   3. Merging the release PR publishes a GitHub Release; release-please.yml
-#      then calls this reusable workflow (a release created by GITHUB_TOKEN
-#      cannot trigger workflows on its own).
-#   4. The image is built from the pinned MegaLinter version for linux/amd64
-#      and pushed to ghcr.io as :<megalinter-version>
+#   1. Renovate bumps MEGALINTER_VERSION below when a new MegaLinter release is
+#      published, and merges it to main.
+#   2. That push (or a change to megalinter-custom-flavor.yml) builds the
+#      linux/amd64 image and pushes it to ghcr.io as :v<megalinter-version>
 #      (no :latest tag is published).
+#   3. Renovate then bumps the image tag and digest pinned in action.yml.
+#
+# Build right after a bump: the upstream builder installs exact Alpine package
+# versions (e.g. go), which Alpine deletes at its next update, so an older
+# MegaLinter version fails to rebuild until the next MegaLinter release.
 #
 # The MegaLinter custom flavor image will be available at:
 #   - ghcr.io/<owner>/<repo>/megalinter-custom-flavor:<tag>
@@ -22,9 +23,12 @@
 name: Build & Push MegaLinter Custom Flavor
 
 on:
-  # Called by release-please.yml after a release (GITHUB_TOKEN releases cannot
-  # trigger workflows), plus manual runs.
-  workflow_call:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/megalinter-custom-flavor-builder.yml
+      - megalinter-custom-flavor.yml
   workflow_dispatch:
 
 concurrency:
@@ -43,6 +47,7 @@ jobs:
   build-custom-flavor:
     name: Build Custom MegaLinter Flavor
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     permissions:
       contents: read
       packages: write
